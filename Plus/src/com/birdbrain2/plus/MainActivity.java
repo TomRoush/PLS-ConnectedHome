@@ -84,9 +84,9 @@ public class MainActivity extends FragmentActivity {
 			Locale l = Locale.getDefault();
 			switch (position) {
 			case 0:
-				return "page1".toUpperCase(l);
+				return "warnings".toUpperCase(l);
 			case 1:
-				return "page2".toUpperCase(l);
+				return "all sensors".toUpperCase(l);
 			}
 			return null;
 		}
