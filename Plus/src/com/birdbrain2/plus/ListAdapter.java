@@ -58,7 +58,7 @@ public class ListAdapter extends BaseAdapter {
 		itemView.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
-    	    	SensorListItem item = new SensorListItem("Hello", "There", "Friend");
+    	    	SensorListItem item = new SensorListItem("Hello", "There", "Friend", "not triggered");
     	    	items.add(item);
     	    	notifyDataSetChanged();
             }

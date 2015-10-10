@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -18,6 +19,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
+import android.util.JsonReader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +37,8 @@ public class FragmentHome extends Fragment {
 	ArrayList<SensorListItem> listItems = new ArrayList<SensorListItem>();
 
 	ListAdapter adapter;
+
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,25 +75,63 @@ public class FragmentHome extends Fragment {
 		return rootView;
 	}
 
-	String useData() {
+	SensorListItem useData(String groupIdd, String sensorIdd) {
 		HttpClient httpClient = new DefaultHttpClient();
 		String retval = null;
 		try {
-			HttpPost request = new HttpPost("http://a6.cfapps.io/groups/5cffd08c-08b2-4a5d-8c13-89ea6c11ee50/sensors");
-			StringEntity params =new StringEntity("{  \"ageRange\": \"20-30\",  \"gender\": \"m\",  \"sensorType\": \"car\", \"zipCode\": \"string\"}");
-			request.addHeader("content-type", "application/json");
-			request.addHeader("Accept","application/json");
-			request.setEntity(params);
-			HttpResponse response = httpClient.execute(request);
-			HttpEntity entity = response.getEntity();
-			retval = convertStreamToString(entity.getContent());
-			// handle response here...
+
+
+			//  Group ID
+			HttpPost getGroupId6 = new HttpPost("https://a6.cfapps.io/groups");
+			getGroupId6.addHeader("content-type", "application/json");
+			getGroupId6.addHeader("Accept","application/json");
+			HttpResponse response6 = httpClient.execute(getGroupId6);
+			HttpEntity entity6 = response6.getEntity();
+			String groupId = parseGroupId(entity6.getContent());
+
+
+			// Sensor 1
+			String requestSensorURL = "http://a6.cfapps.io/groups/" + groupId + "/sensors";
+			HttpPost requestsensor = new HttpPost(requestSensorURL);
+			StringEntity params12 = new StringEntity("{  \"ageRange\": \"20-30\",  \"gender\": \"m\",  \"sensorType\": \"car\", \"zipCode\": \"string\"}");
+			requestsensor.addHeader("content-type", "application/json");
+			requestsensor.addHeader("Accept", "application/json");
+			requestsensor.setEntity(params12);
+			HttpResponse response12 = httpClient.execute(requestsensor);
+			HttpEntity entity8 = response12.getEntity();
+			String sensorId = parseSensorId(entity8.getContent());
+			Log.e("Plus", "sensorID: " + sensorId);
+
+
+			// Send data to sensor
+			String sendDataURL = "https://a6.cfapps.io/groups/" + groupId + "/sensors/" + sensorId + "/data";
+			HttpPost sendData = new HttpPost(sendDataURL);
+			StringEntity params2 =new StringEntity("{\"homeWindowOpen\" : \"1\"}");
+			sendData.addHeader("content-type", "application/json");
+			sendData.addHeader("Accept", "application/json");
+			sendData.setEntity(params2);
+			HttpResponse response13 = httpClient.execute(sendData);
+			HttpEntity entity13 = response13.getEntity();
+
+
+			// Request data from sensor 
+			String requestDataURL = "https://a6.cfapps.io/sensors/" + sensorId + "/data?page=1";
+			HttpGet requestsensordata = new HttpGet(requestDataURL);
+			requestsensordata.addHeader("Accept", "application/json");
+			HttpResponse response2 = httpClient.execute(requestsensordata);
+			HttpEntity entity2 = response2.getEntity();
+			String s2 = parseSensorData(entity2.getContent());
+
+			SensorListItem listitem = new SensorListItem(sensorId, "timegg", s2.substring(0, s2.length()-1), s2.substring(s2.length()-1, s2.length()));
+			return listitem;
+
+
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
 			httpClient.getConnectionManager().shutdown();
 		}
-		return retval;
+		return null;
 	}
 
 	private static String convertStreamToString(InputStream is) {
@@ -111,22 +154,80 @@ public class FragmentHome extends Fragment {
 		}
 		return sb.toString();
 	}
-	
+
+	private String parseSensorData(InputStream in) throws IOException {
+		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+		StringBuilder sb = new StringBuilder();
+		sb.append("DATA: ");
+		reader.beginObject();
+		while (reader.hasNext()) {
+			String name1 = reader.nextName();
+			if (name1.equals("content")) {
+				reader.beginArray();
+				while (reader.hasNext()) {
+					reader.beginObject();
+					while (reader.hasNext()) {
+						String name2 = reader.nextName();
+						if (name2.equals("payload")) {
+							reader.beginObject();
+							while (reader.hasNext()) {
+								sb.append(reader.nextName());
+								sb.append(reader.nextString());
+							}
+						} else {
+							reader.skipValue();
+						}
+					}
+				}
+			} else {
+				reader.skipValue();
+			}
+		}
+		reader.close();
+		return sb.toString();
+	}
+
+	private String parseSensorId(InputStream in) throws IOException {
+		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+		StringBuilder sb = new StringBuilder();
+		reader.beginObject();
+		while (reader.hasNext()) {
+			String name = reader.nextName();
+			if (name.equals("sensorId")) {
+				sb.append(reader.nextString());
+			} else {
+				reader.skipValue();
+			}
+		}
+		reader.close();
+		return sb.toString();
+	}
+
+	private String parseGroupId(InputStream in) throws IOException {
+		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+		StringBuilder sb = new StringBuilder();
+
+		reader.beginObject();
+		while (reader.hasNext()) {
+			String name = reader.nextName();
+			String Id = reader.nextString();
+			sb.append(Id);
+		}
+		reader.close();
+		return sb.toString();
+	}
+
+
 	public void refresh() {
 		if(adapter == null) return;
 		listItems.clear();
 		
 		for(int i = 0; i < 5; i++) {
-			String one = useData();
-			String two = one.substring(73+18, 73+18*2);
-			String three = one.substring(73+18*2, 73+18*3);
-			one = one.substring(73, 73+18);
-			SensorListItem item = new SensorListItem(one, two, three);
+			SensorListItem item = useData("", "");
 			if(!warning || item.triggered()) {
 				listItems.add(item);
 				adapter.notifyDataSetChanged();
 			}
-
 		}
 	}
 }
