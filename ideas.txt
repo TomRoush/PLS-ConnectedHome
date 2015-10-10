@@ -1,0 +1,49 @@
+HomeWindow *
+HomeGarage *
+HomeSmoke *
+HomeFireAlarm *
+HomeWater *
+
+
+Goal of the sensors: prevent damage to the house
+Weather API to use with HomeWater and HomeWindow: Wind, Rain/NoRain - triggers windowOpen/Close
+
+
+Mobile Aspect:
+
+Notification disable for certain time period button
+
+
+HomeWindows/Garage 
+Use:    	App notify user of window being open, set time interval option
+Action: 	give them the option to call someone who might be home(input emergency contact ahead of time) or 911 in case of robbery; Extra 	  		option: time setting, day or night
+
+
+HomeWater(on pipe)+HomePressure
+Use:		App notify user of dangerously level of increase of water flowing inside the pipe
+Action:		just notify, user decision 
+
+HomeGas
+Use:		notify user of abnormal amount of gas level in the house, indicating gas leakage
+Action:		option to contact emergency contact or 911
+
+HomWater(tub)
+Use:		notify user of water leakage from source
+Action:		just notify, (option to contact emergency contact)
+
+HomeFire
+Use:		notify user of a potential fire in the house
+Action:		option to call the nearby fire department
+
+HomeSmoke
+Use:		notify user of smoke, indicating high leve of smoke
+Action:		option to contact emergency contacts or 911
+
+
+
+
+
+
+
+
+
