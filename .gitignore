@@ -12,7 +12,6 @@
 bin/
 gen/
 lib/
-res/
 tmp/
 
 # Local configuration file (sdk path, etc)
