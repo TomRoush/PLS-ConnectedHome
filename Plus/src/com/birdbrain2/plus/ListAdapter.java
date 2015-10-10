@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -49,12 +48,12 @@ public class ListAdapter extends BaseAdapter {
 		
 		one.setText(items.get(position).id);
 		two.setText(items.get(position).time);
-		three.setText(items.get(position).status);
+		three.setText(items.get(position).location);
 		if(items.get(position).triggered()) {
 			ImageView icon = (ImageView)itemView.findViewById(R.id.statusImage);
 			icon.setImageResource(android.R.drawable.stat_notify_error);
 		}
-		
+		/*
 		itemView.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
@@ -63,7 +62,7 @@ public class ListAdapter extends BaseAdapter {
     	    	notifyDataSetChanged();
             }
         });
-		
+		*/
 		return itemView;
 	}
 }

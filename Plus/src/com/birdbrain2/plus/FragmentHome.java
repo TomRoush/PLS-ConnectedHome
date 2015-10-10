@@ -37,8 +37,9 @@ public class FragmentHome extends Fragment {
 	ArrayList<SensorListItem> listItems = new ArrayList<SensorListItem>();
 
 	ListAdapter adapter;
-
-
+	String sensorId;
+	String groupId = "40fc636b-292f-400f-82d8-621bd307cb63";
+	int counter = 0;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -80,16 +81,58 @@ public class FragmentHome extends Fragment {
 		String retval = null;
 		try {
 
-
+			// TEMPORARY
 			//  Group ID
+			/*
 			HttpPost getGroupId6 = new HttpPost("https://a6.cfapps.io/groups");
 			getGroupId6.addHeader("content-type", "application/json");
 			getGroupId6.addHeader("Accept","application/json");
 			HttpResponse response6 = httpClient.execute(getGroupId6);
 			HttpEntity entity6 = response6.getEntity();
-			String groupId = parseGroupId(entity6.getContent());
+			groupId = parseGroupId(entity6.getContent());
+			*/
+
+			createNewSensor();
 
 
+			// TEMPORARY
+			/*
+			// Send data to sensor
+			String sendDataURL = "https://a6.cfapps.io/groups/" + groupId + "/sensors/" + sensorId + "/data";
+			HttpPost sendData = new HttpPost(sendDataURL);
+			StringEntity params2 =new StringEntity("{\"homeWindowOpen\" : \"" + counter +  "\"}");
+			sendData.addHeader("content-type", "application/json");
+			sendData.addHeader("Accept", "application/json");
+			sendData.setEntity(params2);
+			HttpResponse response13 = httpClient.execute(sendData);
+			HttpEntity entity13 = response13.getEntity();
+			*/
+
+
+			// Request data from sensor 
+			String requestDataURL = "http://as-hack-app-listener.cfapps.io/data";
+			HttpGet requestsensordata = new HttpGet(requestDataURL);
+			requestsensordata.addHeader("Accept", "application/json");
+			HttpResponse response2 = httpClient.execute(requestsensordata);
+			HttpEntity entity2 = response2.getEntity();
+			SensorListItem item = parseSensorData(entity2.getContent());
+
+			//SensorListItem listitem = new SensorListItem(sensorId, "timegg", s2.substring(0, s2.length()-1), s2.substring(s2.length()-1, s2.length()));
+			counter++;
+			if (counter == 2) counter = 0;
+			return item;
+		}catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			httpClient.getConnectionManager().shutdown();
+		}
+		return null;
+	}
+
+	void createNewSensor() {
+		HttpClient httpClient = new DefaultHttpClient();
+
+		try {
 			// Sensor 1
 			String requestSensorURL = "http://a6.cfapps.io/groups/" + groupId + "/sensors";
 			HttpPost requestsensor = new HttpPost(requestSensorURL);
@@ -99,39 +142,12 @@ public class FragmentHome extends Fragment {
 			requestsensor.setEntity(params12);
 			HttpResponse response12 = httpClient.execute(requestsensor);
 			HttpEntity entity8 = response12.getEntity();
-			String sensorId = parseSensorId(entity8.getContent());
-			Log.e("Plus", "sensorID: " + sensorId);
-
-
-			// Send data to sensor
-			String sendDataURL = "https://a6.cfapps.io/groups/" + groupId + "/sensors/" + sensorId + "/data";
-			HttpPost sendData = new HttpPost(sendDataURL);
-			StringEntity params2 =new StringEntity("{\"homeWindowOpen\" : \"1\"}");
-			sendData.addHeader("content-type", "application/json");
-			sendData.addHeader("Accept", "application/json");
-			sendData.setEntity(params2);
-			HttpResponse response13 = httpClient.execute(sendData);
-			HttpEntity entity13 = response13.getEntity();
-
-
-			// Request data from sensor 
-			String requestDataURL = "https://a6.cfapps.io/sensors/" + sensorId + "/data?page=1";
-			HttpGet requestsensordata = new HttpGet(requestDataURL);
-			requestsensordata.addHeader("Accept", "application/json");
-			HttpResponse response2 = httpClient.execute(requestsensordata);
-			HttpEntity entity2 = response2.getEntity();
-			String s2 = parseSensorData(entity2.getContent());
-
-			SensorListItem listitem = new SensorListItem(sensorId, "timegg", s2.substring(0, s2.length()-1), s2.substring(s2.length()-1, s2.length()));
-			return listitem;
-
-
+			sensorId = parseSensorId(entity8.getContent());
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
 			httpClient.getConnectionManager().shutdown();
 		}
-		return null;
 	}
 
 	private static String convertStreamToString(InputStream is) {
@@ -155,28 +171,42 @@ public class FragmentHome extends Fragment {
 		return sb.toString();
 	}
 
-	private String parseSensorData(InputStream in) throws IOException {
+	private SensorListItem parseSensorData(InputStream in) throws IOException {
 		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-		StringBuilder sb = new StringBuilder();
-		sb.append("DATA: ");
-		reader.beginObject();
+
+		String id = "";
+		String time = "";
+		String location = "";
+		String triggered = "1";
+
+		reader.beginArray();
 		while (reader.hasNext()) {
+			reader.beginObject();
 			String name1 = reader.nextName();
-			if (name1.equals("content")) {
-				reader.beginArray();
+			if (name1.equals("data")) {
+				reader.beginObject();
 				while (reader.hasNext()) {
-					reader.beginObject();
-					while (reader.hasNext()) {
-						String name2 = reader.nextName();
-						if (name2.equals("payload")) {
+					if (reader.nextName().equals("data")) {
+						reader.beginObject();
+						while (reader.hasNext()) {
+							String name2 = reader.nextName();
 							reader.beginObject();
 							while (reader.hasNext()) {
-								sb.append(reader.nextName());
-								sb.append(reader.nextString());
+								String type = reader.nextName();
+								String value = reader.nextString();
+								if (type.equals("type")) {
+									id += value;
+								} else if (type.equals("status")) {
+									triggered = value;
+								} else if (type.equals("location")) {
+									location += value;
+								} else if (type.equals("time")) {
+									time += value;
+								}
 							}
-						} else {
-							reader.skipValue();
 						}
+					} else {
+						reader.skipValue();
 					}
 				}
 			} else {
@@ -184,7 +214,9 @@ public class FragmentHome extends Fragment {
 			}
 		}
 		reader.close();
-		return sb.toString();
+
+		SensorListItem item = new SensorListItem(id, time, location, triggered);
+		return item;
 	}
 
 	private String parseSensorId(InputStream in) throws IOException {
