@@ -183,44 +183,55 @@ public class FragmentHome extends Fragment {
 		reader.beginArray();
 		while (reader.hasNext()) {
 			reader.beginObject();
-			String name1 = reader.nextName();
-			if (name1.equals("data")) {
-				reader.beginObject();
-				while (reader.hasNext()) {
-					if (reader.nextName().equals("data")) {
-						reader.beginObject();
-						while (reader.hasNext()) {
-							String name2 = reader.nextName();
+			while (reader.hasNext()) {
+				String name1 = reader.nextName();
+				if (name1.equals("data")) {
+					reader.beginObject();
+					while (reader.hasNext()) {
+						if (reader.nextName().equals("data")) {
 							reader.beginObject();
 							while (reader.hasNext()) {
-								String type = reader.nextName();
-								String value = reader.nextString();
-								if (type.equals("type")) {
-									id += value;
-								} else if (type.equals("status")) {
-									triggered = value;
-								} else if (type.equals("location")) {
-									location += value;
-								} else if (type.equals("time")) {
-									time += value;
+								String name2 = reader.nextName();
+								reader.beginObject();
+								while (reader.hasNext()) {
+									String type = reader.nextName();
+									String value = reader.nextString();
+									if (type.equals("type")) {
+										id = value;
+									} else if (type.equals("status")) {
+										triggered = value;
+									} else if (type.equals("location")) {
+										location = value;
+									} else if (type.equals("time")) {
+										time = value;
+									} else {
+										//reader.skipValue();
+									}
 								}
+								reader.endObject();
 							}
+							reader.endObject();
+						} else {
+							reader.skipValue();
 						}
-					} else {
-						reader.skipValue();
 					}
+					reader.endObject();
+				} else {
+					reader.skipValue();
 				}
-			} else {
-				reader.skipValue();
-			}
 
 
-			SensorListItem item = new SensorListItem(id, time, location, triggered);
-			if(!warning || item.triggered()) {
-				listItems.add(item);
-				adapter.notifyDataSetChanged();
+				SensorListItem item = new SensorListItem(id, time, location, triggered);
+				if (!warning || item.triggered()) {
+					listItems.add(item);
+					adapter.notifyDataSetChanged();
+					Log.e("", "item added");
+				}
+
 			}
+			reader.endObject();
 		}
+		reader.endArray();
 		reader.close();
 	}
 
