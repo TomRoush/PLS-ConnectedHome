@@ -9,8 +9,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity {
 	PagerAdapter pagerAdapter;
@@ -31,25 +32,12 @@ public class MainActivity extends FragmentActivity {
 		pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		viewPager.setAdapter(pagerAdapter);
 		viewPager.setCurrentItem(0);
-		viewPager.setOnPageChangeListener(new OnPageChangeListener() {
-			@Override
-			public void onPageSelected(int position) {}
-
-			@Override
-			public void onPageScrollStateChanged(int state) {
-				if(state == 1) {
-					if(viewPager.getCurrentItem() == 0) 
-					{
-//						one.refresh();
-					} else {
-//						two.refresh();
-					}
-				}
-			}
-
-			@Override
-			public void onPageScrolled(int position, float arg1, int arg2) {}
-		});
+	}
+	
+	public void refresh(View v) {
+		Toast toast = Toast.makeText(getBaseContext(), "Updating data...", Toast.LENGTH_SHORT);
+		toast.show();
+		((FragmentHome) ((ScreenSlidePagerAdapter) pagerAdapter).getItem(viewPager.getCurrentItem())).refresh();
 	}
 	
 	private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -65,10 +53,20 @@ public class MainActivity extends FragmentActivity {
 		@Override
 		public Fragment getItem(int position) {
 			if(position == 0) {
-				one = new FragmentHome();
+				if(one == null) {
+					one = new FragmentHome();
+					Bundle args = new Bundle();
+					args.putBoolean("warning", true);
+					one.setArguments(args);
+				}
 				return one;
 			} else {
-				two = new FragmentHome();
+				if(two == null) {
+					two = new FragmentHome();
+					Bundle args = new Bundle();
+					args.putBoolean("warning", false);
+					two.setArguments(args);
+				}
 				return two;
 			}
 		}

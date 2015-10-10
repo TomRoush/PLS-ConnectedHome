@@ -28,7 +28,7 @@
     
     <ImageView
         android:id="@+id/statusImage"
-        android:src="@android:drawable/stat_notify_error"
+        
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

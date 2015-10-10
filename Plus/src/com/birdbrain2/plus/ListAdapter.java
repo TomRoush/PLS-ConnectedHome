@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ListAdapter extends BaseAdapter {
@@ -49,6 +50,10 @@ public class ListAdapter extends BaseAdapter {
 		one.setText(items.get(position).id);
 		two.setText(items.get(position).time);
 		three.setText(items.get(position).status);
+		if(items.get(position).triggered()) {
+			ImageView icon = (ImageView)itemView.findViewById(R.id.statusImage);
+			icon.setImageResource(android.R.drawable.stat_notify_error);
+		}
 		
 		itemView.setOnClickListener(new OnClickListener() {            
             @Override

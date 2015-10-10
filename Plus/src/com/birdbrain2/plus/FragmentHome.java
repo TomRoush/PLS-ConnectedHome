@@ -18,16 +18,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class FragmentHome extends Fragment {
 	View rootView;
 	Activity activity;
 	Context context;
+	boolean warning;
 
 	ListView listView;
 	ArrayList<SensorListItem> listItems = new ArrayList<SensorListItem>();
@@ -58,6 +59,9 @@ public class FragmentHome extends Fragment {
 		// Builds the notification and issues it.
 		mNotifyMgr.notify(mNotificationId, mBuilder.build());
 		 */
+		
+		Bundle args = getArguments();
+		warning = args.getBoolean("warning", false);
 
 		listView = (ListView) rootView.findViewById(R.id.listView);
 		adapter = new ListAdapter(activity, listItems);
@@ -109,15 +113,19 @@ public class FragmentHome extends Fragment {
 	}
 	
 	public void refresh() {
+		if(adapter == null) return;
 		listItems.clear();
+		
 		for(int i = 0; i < 5; i++) {
 			String one = useData();
 			String two = one.substring(73+18, 73+18*2);
 			String three = one.substring(73+18*2, 73+18*3);
 			one = one.substring(73, 73+18);
 			SensorListItem item = new SensorListItem(one, two, three);
-			listItems.add(item);
-			adapter.notifyDataSetChanged();
+			if(!warning || item.triggered()) {
+				listItems.add(item);
+				adapter.notifyDataSetChanged();
+			}
 
 		}
 	}

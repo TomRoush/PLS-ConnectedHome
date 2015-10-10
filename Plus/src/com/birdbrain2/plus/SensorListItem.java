@@ -9,4 +9,9 @@ public class SensorListItem {
 		time = t;
 		status = s;
 	}
+	
+	public boolean triggered() {
+		// returns whether this sensor is triggered
+		return true;
+	}
 }
