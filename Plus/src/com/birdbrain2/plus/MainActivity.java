@@ -9,12 +9,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.WindowManager;
 
 public class MainActivity extends FragmentActivity {
 	PagerAdapter pagerAdapter;
 	ViewPager viewPager;
 	private static final int NUM_PAGES = 2;
+	FragmentHome one;
+	FragmentHome two;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +31,25 @@ public class MainActivity extends FragmentActivity {
 		pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 		viewPager.setAdapter(pagerAdapter);
 		viewPager.setCurrentItem(0);
+		viewPager.setOnPageChangeListener(new OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {}
+
+			@Override
+			public void onPageScrollStateChanged(int state) {
+				if(state == 1) {
+					if(viewPager.getCurrentItem() == 0) 
+					{
+						one.refresh();
+					} else {
+						two.refresh();
+					}
+				}
+			}
+
+			@Override
+			public void onPageScrolled(int position, float arg1, int arg2) {}
+		});
 	}
 	
 	private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -43,9 +65,11 @@ public class MainActivity extends FragmentActivity {
 		@Override
 		public Fragment getItem(int position) {
 			if(position == 0) {
-				return new FragmentHome();
+				one = new FragmentHome();
+				return one;
 			} else {
-				return new FragmentHome();
+				two = new FragmentHome();
+				return two;
 			}
 		}
 
