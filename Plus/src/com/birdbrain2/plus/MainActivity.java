@@ -1,80 +1,62 @@
 package com.birdbrain2.plus;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import android.app.Activity;
+import android.content.Context;
+import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.StrictMode;
-import android.util.Log;
-import android.widget.TextView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.view.WindowManager;
 
-public class MainActivity extends Activity {
-
+public class MainActivity extends FragmentActivity {
+	PagerAdapter pagerAdapter;
+	ViewPager viewPager;
+	private static final int NUM_PAGES = 2;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Log.e("Plus", "Hey1");
-		// TODO: dangerous work around
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		StrictMode.setThreadPolicy(policy); 
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+		final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 10, 0);
 		
-		useData();
-		Log.e("Plus", "Hey3");
+		// Instantiate a ViewPager and a PagerAdapter.
+		viewPager = (ViewPager) findViewById(R.id.viewPager);
+		pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+		viewPager.setAdapter(pagerAdapter);
+		viewPager.setCurrentItem(0);
 	}
 	
-	void useData() {
-		Log.e("Plus", "Hey");
-		TextView textView = (TextView) findViewById(R.id.text);
-		HttpClient httpClient = new DefaultHttpClient();
-
-		try {
-		    HttpPost request = new HttpPost("http://a6.cfapps.io/groups/5cffd08c-08b2-4a5d-8c13-89ea6c11ee50/sensors");
-		    StringEntity params =new StringEntity("{  \"ageRange\": \"20-30\",  \"gender\": \"m\",  \"sensorType\": \"car\", \"zipCode\": \"string\"}");
-		    request.addHeader("content-type", "application/json");
-		    request.addHeader("Accept","application/json");
-		    request.setEntity(params);
-		    HttpResponse response = httpClient.execute(request);
-		    HttpEntity entity = response.getEntity();
-		    String s = convertStreamToString(entity.getContent());
-		    textView.setText(s);
-		    Log.e("Plus", s);
-		    // handle response here...
-		}catch (Exception ex) {
-		    ex.printStackTrace();
-		} finally {
-		    httpClient.getConnectionManager().shutdown();
+	private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+		public ScreenSlidePagerAdapter(FragmentManager fm) {
+			super(fm);
 		}
-	}
-	
-	private static String convertStreamToString(InputStream is) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-	    StringBuilder sb = new StringBuilder();
 
-	    String line = null;
-	    try {
-	        while ((line = reader.readLine()) != null) {
-	            sb.append(line + "\n");
-	        }
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    } finally {
-	        try {
-	            is.close();
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
-	    return sb.toString();
+		/**
+		 * Gets the current fragment
+		 * 
+		 * @return the current fragment
+		 */
+		@Override
+		public Fragment getItem(int position) {
+			if(position == 0) {
+				return new FragmentHome();
+			} else {
+				return new FragmentHome();
+			}
+		}
+
+		/**
+		 * @return the number of pages this slider holds
+		 */
+		@Override
+		public int getCount() {
+			return NUM_PAGES;
+		}
 	}
 }

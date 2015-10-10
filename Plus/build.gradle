@@ -48,5 +48,4 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.android.support:recyclerview-v7:21.0.2'
 
-	compile 'org.apache.httpcomponents:httpclient:4.5.1';
-}
+	compile 'com.android.support:support-v4:21.0.3'}
