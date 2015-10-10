@@ -1,7 +1,7 @@
 package com.birdbrain2.plus;
 
-import android.content.Context;
-import android.media.AudioManager;
+import java.util.Locale;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -20,10 +20,8 @@ public class MainActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		// Keep screen on for demo
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 10, 0);
 		
 		// Instantiate a ViewPager and a PagerAdapter.
 		viewPager = (ViewPager) findViewById(R.id.viewPager);
@@ -57,6 +55,18 @@ public class MainActivity extends FragmentActivity {
 		@Override
 		public int getCount() {
 			return NUM_PAGES;
+		}
+		
+		@Override
+		public CharSequence getPageTitle(int position) {
+			Locale l = Locale.getDefault();
+			switch (position) {
+			case 0:
+				return "page1".toUpperCase(l);
+			case 1:
+				return "page2".toUpperCase(l);
+			}
+			return null;
 		}
 	}
 }
