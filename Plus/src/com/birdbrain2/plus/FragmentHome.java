@@ -115,12 +115,13 @@ public class FragmentHome extends Fragment {
 			requestsensordata.addHeader("Accept", "application/json");
 			HttpResponse response2 = httpClient.execute(requestsensordata);
 			HttpEntity entity2 = response2.getEntity();
-			SensorListItem item = parseSensorData(entity2.getContent());
+			//SensorListItem item = parseSensorData(entity2.getContent());
+			parseSensorData(entity2.getContent());
 
 			//SensorListItem listitem = new SensorListItem(sensorId, "timegg", s2.substring(0, s2.length()-1), s2.substring(s2.length()-1, s2.length()));
 			counter++;
 			if (counter == 2) counter = 0;
-			return item;
+			return null;
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
@@ -171,7 +172,7 @@ public class FragmentHome extends Fragment {
 		return sb.toString();
 	}
 
-	private SensorListItem parseSensorData(InputStream in) throws IOException {
+	private void parseSensorData(InputStream in) throws IOException {
 		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
 
 		String id = "";
@@ -212,12 +213,17 @@ public class FragmentHome extends Fragment {
 			} else {
 				reader.skipValue();
 			}
+
+
+			SensorListItem item = new SensorListItem(id, time, location, triggered);
+			if(!warning || item.triggered()) {
+				listItems.add(item);
+				adapter.notifyDataSetChanged();
+			}
 		}
 		reader.close();
-
-		SensorListItem item = new SensorListItem(id, time, location, triggered);
-		return item;
 	}
+
 
 	private String parseSensorId(InputStream in) throws IOException {
 		JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
@@ -254,12 +260,14 @@ public class FragmentHome extends Fragment {
 		if(adapter == null) return;
 		listItems.clear();
 		
-		for(int i = 0; i < 5; i++) {
+		//for(int i = 0; i < 5; i++) {
 			SensorListItem item = useData("", "");
+			/*
 			if(!warning || item.triggered()) {
 				listItems.add(item);
 				adapter.notifyDataSetChanged();
 			}
-		}
+			*/
+		//}
 	}
 }
