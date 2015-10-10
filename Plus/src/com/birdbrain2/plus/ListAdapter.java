@@ -42,16 +42,18 @@ public class ListAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View itemView = inflater.inflate(R.layout.list_item, null);
 		
-		TextView one = (TextView)itemView.findViewById(R.id.part1);
-		TextView two = (TextView)itemView.findViewById(R.id.part2);
+		TextView one = (TextView)itemView.findViewById(R.id.sensorID);
+		TextView two = (TextView)itemView.findViewById(R.id.time);
+		TextView three = (TextView)itemView.findViewById(R.id.status);
 		
-		one.setText(items.get(position).part1);
-		two.setText(items.get(position).part2);
+		one.setText(items.get(position).id);
+		two.setText(items.get(position).time);
+		three.setText(items.get(position).status);
 		
 		itemView.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
-    	    	SensorListItem item = new SensorListItem("Hello", "There");
+    	    	SensorListItem item = new SensorListItem("Hello", "There", "Friend");
     	    	items.add(item);
     	    	notifyDataSetChanged();
             }

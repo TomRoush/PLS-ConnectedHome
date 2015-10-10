@@ -40,9 +40,9 @@ public class MainActivity extends FragmentActivity {
 				if(state == 1) {
 					if(viewPager.getCurrentItem() == 0) 
 					{
-						one.refresh();
+//						one.refresh();
 					} else {
-						two.refresh();
+//						two.refresh();
 					}
 				}
 			}

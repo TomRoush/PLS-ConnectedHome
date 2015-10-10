@@ -113,8 +113,9 @@ public class FragmentHome extends Fragment {
 		for(int i = 0; i < 5; i++) {
 			String one = useData();
 			String two = one.substring(73+18, 73+18*2);
+			String three = one.substring(73+18*2, 73+18*3);
 			one = one.substring(73, 73+18);
-			SensorListItem item = new SensorListItem(one, two);
+			SensorListItem item = new SensorListItem(one, two, three);
 			listItems.add(item);
 			adapter.notifyDataSetChanged();
 
